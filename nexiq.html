@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEXIQ — Next Generation Intelligence Shopping</title>
+
+  <!-- Google Fonts: Fraunces (Editorial High-Contrast Serif) & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,600;1,9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js CDN for Price Tracker -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Fraunces"', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            ivory: '#FAF6EE',
+            cream: '#FDFBF7',
+            blush: '#F3E8DC',
+            sage: '#EAF0E8',
+            forest: {
+              DEFAULT: '#113E2A',
+              light: '#1B593D',
+              dark: '#0A291B',
+            },
+            terracotta: {
+              DEFAULT: '#D95D39',
+              light: '#FBEAE4',
+              dark: '#B64424',
+            },
+            gold: {
+              DEFAULT: '#C68B2C',
+              light: '#FBF2E1',
+            },
+            stoneLine: '#E4DDD0',
+          },
+          boxShadow: {
+            editorial: '0 10px 30px -12px rgba(17, 62, 42, 0.08), 0 2px 6px -1px rgba(17, 62, 42, 0.04)',
+            editorialHover: '0 18px 40px -14px rgba(17, 62, 42, 0.14), 0 4px 10px -2px rgba(17, 62, 42, 0.06)',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root {
+      font-size: 16px;
+    }
+    html.larger-text {
+      font-size: 18.5px;
+    }
+
+    body {
+      background-color: #FAF6EE;
+      background-image:
+        radial-gradient(ellipse 65% 55% at 8% 6%, rgba(243, 232, 220, 0.92) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 55% at 92% 10%, rgba(234, 240, 232, 0.95) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 45% at 50% 95%, rgba(243, 232, 220, 0.65) 0%, transparent 70%);
+      background-attachment: fixed;
+      color: #16241D;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      overflow-x: hidden;
+      transition: font-size 0.2s ease;
+    }
+
+    .editorial-card {
+      background: #FFFFFF;
+      border: 1px solid #E4DDD0;
+      border-radius: 22px;
+      box-shadow: 0 10px 30px -12px rgba(17, 62, 42, 0.07), 0 1px 3px rgba(17, 62, 42, 0.03);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+
+    .editorial-card-soft {
+      background: #FDFBF7;
+      border: 1px solid #E4DDD0;
+      border-radius: 20px;
+    }
+
+    .editorial-hover:hover {
+      transform: translateY(-2px);
+      border-color: #CBBFA9;
+      box-shadow: 0 18px 36px -14px rgba(17, 62, 42, 0.13);
+    }
+
+    .btn-forest {
+      background-color: #113E2A;
+      color: #FAF6EE;
+      transition: all 0.2s ease;
+    }
+    .btn-forest:hover {
+      background-color: #1A563B;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px -8px rgba(17, 62, 42, 0.42);
+    }
+    .btn-forest:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .pill-tab-active {
+      background-color: #113E2A !important;
+      color: #FAF6EE !important;
+      border-color: #113E2A !important;
+      box-shadow: 0 6px 16px -6px rgba(17, 62, 42, 0.45);
+    }
+
+    .micro-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #D95D39;
+    }
+
+    /* Smooth animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-up {
+      animation: fadeUp 0.35s ease-out forwards;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #F3EDE2 25%, #FAF6EE 50%, #F3EDE2 75%);
+      background-size: 800px 100%;
+      animation: shimmer 1.4s infinite linear;
+    }
+
+    @keyframes squirrelBob {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
+    .animate-squirrel {
+      animation: squirrelBob 4.2s ease-in-out infinite;
+    }
+
+    /* Warm editorial scrollbar */
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: #FAF6EE; }
+    ::-webkit-scrollbar-thumb { background: #D7CEBE; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #113E2A; }
+  </style>
+</head>
+<body class="min-h-screen selection:bg-forest/15 selection:text-forest">
+
+  <!-- ===================================================================== -->
+  <!-- 1. MANDATORY MEMBER ACCESS GATE (REQUIRED BEFORE WORKSPACE)           -->
+  <!-- ===================================================================== -->
+  <div id="auth-gate" class="min-h-screen flex items-center justify-center p-4 sm:p-6">
+    <div class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-center animate-fade-up">
+
+      <!-- Left Editorial Showcase with Grand Squirrel-Surrounded NEXIQ Lockup -->
+      <div class="lg:col-span-6 text-center lg:text-left space-y-5 px-2 sm:px-4">
+        <div class="flex justify-center lg:justify-start">
+          <div id="gate-logo-mount" class="w-full max-w-[360px]"></div>
+        </div>
+
+        <div class="space-y-3">
+          <p class="micro-label">Member-Only AI Shopping Concierge</p>
+          <h1 class="font-serif text-3xl sm:text-4xl font-bold text-[#142019] leading-[1.12] tracking-tight">
+            Shop with <span class="italic text-forest">sharp eyes</span>,<br class="hidden sm:inline" /> never guesswork.
+          </h1>
+          <p class="text-sm sm:text-base text-[#4A5950] leading-relaxed max-w-md mx-auto lg:mx-0">
+            Live Amazon India vs Flipkart offer intelligence, crystal-clear buyer pros &amp; cons, and an energetic AI concierge that remembers your wishlist and price alerts.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap justify-center lg:justify-start gap-2.5 pt-1 text-xs font-semibold text-forest">
+          <span class="px-3 py-1.5 rounded-full bg-white border border-stoneLine">✨ Live 2026 Offers &amp; Discounts</span>
+          <span class="px-3 py-1.5 rounded-full bg-white border border-stoneLine">⚖️ Amazon vs Flipkart Verdicts</span>
+          <span class="px-3 py-1.5 rounded-full bg-white border border-stoneLine">♡ Cloud-Synced Wishlist</span>
+        </div>
+      </div>
+
+      <!-- Right Auth Card -->
+      <div class="lg:col-span-6">
+        <div class="editorial-card p-6 sm:p-8 max-w-md mx-auto w-full">
+          <div class="mb-5">
+            <p class="micro-label mb-1">Member Access Required</p>
+            <h2 id="auth-heading" class="font-serif text-2xl font-bold text-[#142019]">Sign in to NEXIQ</h2>
+            <p class="text-xs text-[#5A6960] mt-1">Authenticate to unlock live AI shopping, cloud wishlist &amp; price drop alerts.</p>
+          </div>
+
+          <!-- Sign In / Create Account Toggle -->
+          <div class="grid grid-cols-2 gap-1.5 p-1 rounded-full bg-[#F3EDE2] border border-stoneLine mb-5">
+            <button type="button" id="tab-signin" onclick="setAuthMode('signin')" class="py-2 rounded-full text-xs font-bold bg-forest text-ivory transition-all">
+              Sign In
+            </button>
+            <button type="button" id="tab-signup" onclick="setAuthMode('signup')" class="py-2 rounded-full text-xs font-semibold text-[#4A5950] hover:text-forest transition-all">
+              Create Account
+            </button>
+          </div>
+
+          <!-- Inline Error / Info Box -->
+          <div id="auth-error-box" class="hidden mb-4 p-3 rounded-xl bg-terracotta-light border border-terracotta/30 text-terracotta-dark text-xs font-medium flex items-start gap-2">
+            <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 mt-0.5"></i>
+            <span id="auth-error-text"></span>
+          </div>
+
+          <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-3.5" novalidate>
+            <!-- Full Name (Sign Up only) -->
+            <div id="field-fullname" class="hidden">
+              <label for="input-fullname" class="block text-xs font-bold text-[#25352C] mb-1">Full Name <span class="text-terracotta">*</span></label>
+              <input id="input-fullname" type="text" autocomplete="name" placeholder="e.g. Aarav Sharma"
+                class="w-full px-4 py-2.5 rounded-xl bg-cream border border-stoneLine text-sm text-[#142019] placeholder-[#8A948D] focus:outline-none focus:border-forest focus:ring-2 focus:ring-forest/15 transition-all" />
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label for="input-email" class="block text-xs font-bold text-[#25352C] mb-1">Email Address <span class="text-terracotta">*</span></label>
+              <input id="input-email" type="email" required autocomplete="email" placeholder="you@example.com"
+                class="w-full px-4 py-2.5 rounded-xl bg-cream border border-stoneLine text-sm text-[#142019] placeholder-[#8A948D] focus:outline-none focus:border-forest focus:ring-2 focus:ring-forest/15 transition-all" />
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label for="input-password" class="block text-xs font-bold text-[#25352C] mb-1">Password <span class="text-terracotta">*</span></label>
+              <input id="input-password" type="password" required minlength="6" autocomplete="current-password" placeholder="Minimum 6 characters"
+                class="w-full px-4 py-2.5 rounded-xl bg-cream border border-stoneLine text-sm text-[#142019] placeholder-[#8A948D] focus:outline-none focus:border-forest focus:ring-2 focus:ring-forest/15 transition-all" />
+            </div>
+
+            <!-- Optional Shopping Vibe Selector -->
+            <div>
+              <label class="block text-xs font-bold text-[#25352C] mb-1.5">Your Shopping Vibe <span class="text-[#7A877F] font-normal">(optional)</span></label>
+              <div class="grid grid-cols-3 gap-2" id="vibe-selector">
+                <button type="button" data-vibe="Tech Hunter" onclick="selectShoppingVibe('Tech Hunter')"
+                  class="vibe-btn px-2.5 py-2 rounded-xl text-[11px] font-semibold border border-forest bg-forest/10 text-forest transition-all">
+                  ⚡ Tech Hunter
+                </button>
+                <button type="button" data-vibe="Fashionista" onclick="selectShoppingVibe('Fashionista')"
+                  class="vibe-btn px-2.5 py-2 rounded-xl text-[11px] font-semibold border border-stoneLine bg-cream text-[#4A5950] hover:border-forest/40 transition-all">
+                  ✨ Fashionista
+                </button>
+                <button type="button" data-vibe="Everyday Smart Buyer" onclick="selectShoppingVibe('Everyday Smart Buyer')"
+                  class="vibe-btn px-2.5 py-2 rounded-xl text-[11px] font-semibold border border-stoneLine bg-cream text-[#4A5950] hover:border-forest/40 transition-all">
+                  🛍️ Smart Buyer
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" id="auth-submit-btn" class="w-full btn-forest py-3 rounded-full text-sm font-bold flex items-center justify-center gap-2 mt-2">
+              <span id="auth-submit-label">Enter NEXIQ Workspace</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </form>
+
+          <!-- Divider -->
+          <div class="relative my-5">
+            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-stoneLine"></div></div>
+            <div class="relative flex justify-center text-[11px] uppercase tracking-wider">
+              <span class="bg-white px-3 text-[#7A877F] font-semibold">or continue with</span>
+            </div>
+          </div>
+
+          <!-- Google Sign-In -->
+          <button type="button" id="google-signin-btn" onclick="handleGoogleSignIn()"
+            class="w-full py-2.5 px-4 rounded-full bg-cream hover:bg-[#F3EDE2] border border-stoneLine text-sm font-semibold text-[#1A2820] flex items-center justify-center gap-2.5 transition-all">
+            <svg class="w-4 h-4" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.79-.07-1.54-.19-2.27h-11.3v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/>
+              <path fill="#34A853" d="M12.255 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96h-3.98v3.09C3.515 21.3 7.565 24 12.255 24z"/>
+              <path fill="#FBBC05" d="M5.525 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62h-3.98a11.86 11.86 0 0 0 0 10.76l3.98-3.09z"/>
+              <path fill="#EA4335" d="M12.255 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C18.205 1.19 15.495 0 12.255 0c-4.69 0-8.74 2.7-10.71 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/>
+            </svg>
+            <span>Continue with Google</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 2. AUTHENTICATED NEXIQ WORKSPACE                                      -->
+  <!-- ===================================================================== -->
+  <div id="app-shell" class="hidden min-h-screen flex flex-col">
+
+    <!-- STICKY EDITORIAL TOP NAVIGATION BAR -->
+    <header class="sticky top-0 z-40 bg-ivory/90 backdrop-blur-lg border-b border-stoneLine">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between py-3 gap-3">
+
+          <!-- Left: Compact Squirrel + NEXIQ Crest -->
+          <button onclick="navigateTo('home')" class="flex items-center gap-2.5 text-left group shrink-0">
+            <div id="header-logo-mount" class="w-11 h-11 shrink-0 group-hover:scale-105 transition-transform"></div>
+            <div class="leading-none">
+              <div class="font-serif font-extrabold text-xl tracking-tight text-forest">NEXIQ</div>
+              <div class="text-[8.5px] font-bold tracking-[0.13em] uppercase text-terracotta mt-0.5 hidden sm:block">Next Gen Intelligence Shopping</div>
+            </div>
+          </button>
+
+          <!-- Center: Navigation Tabs (Desktop) -->
+          <nav class="hidden lg:flex items-center gap-1 bg-white/90 border border-stoneLine rounded-full p-1 shadow-sm">
+            <button data-nav="home" onclick="navigateTo('home')" class="nav-tab px-4 py-1.5 rounded-full text-xs font-bold text-[#3D4E44] hover:text-forest transition-all">
+              AI Concierge
+            </button>
+            <button data-nav="compare" onclick="navigateTo('compare')" class="nav-tab px-4 py-1.5 rounded-full text-xs font-bold text-[#3D4E44] hover:text-forest transition-all flex items-center gap-1.5">
+              Compare
+              <span id="nav-compare-count" class="hidden text-[10px] px-1.5 py-0.5 rounded-full bg-gold-light text-gold font-extrabold">0</span>
+            </button>
+            <button data-nav="reviews" onclick="navigateTo('reviews')" class="nav-tab px-4 py-1.5 rounded-full text-xs font-bold text-[#3D4E44] hover:text-forest transition-all">
+              Reviews
+            </button>
+            <button data-nav="price-tracker" onclick="navigateTo('price-tracker')" class="nav-tab px-4 py-1.5 rounded-full text-xs font-bold text-[#3D4E44] hover:text-forest transition-all">
+              Price Tracker
+            </button>
+            <button data-nav="wishlist" onclick="navigateTo('wishlist')" class="nav-tab px-4 py-1.5 rounded-full text-xs font-bold text-[#3D4E44] hover:text-forest transition-all">
+              Wishlist
+            </button>
+          </nav>
+
+          <!-- Right: Wishlist Pill, Larger Text Toggle, User Profile & Sign Out -->
+          <div class="flex items-center gap-2">
+            <!-- Live ♡ X saved pill -->
+            <button onclick="navigateTo('wishlist')"
+              class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-terracotta-light/85 hover:bg-terracotta-light border border-terracotta/25 text-xs font-bold text-[#47251B] transition-all">
+              <span class="text-terracotta text-sm leading-none">♡</span>
+              <span><span id="header-saved-count">0</span> saved</span>
+            </button>
+
+            <!-- Larger text accessibility toggle -->
+            <button id="larger-text-btn" onclick="toggleLargerText()" title="Toggle Larger Text"
+              class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-[#F3EDE2] border border-stoneLine text-xs font-semibold text-[#2A3A31] transition-all">
+              <span class="font-serif font-bold text-sm leading-none">T</span>
+              <span>Larger text</span>
+            </button>
+
+            <!-- User Chip + Sign Out -->
+            <div class="flex items-center gap-2 pl-1 border-l border-stoneLine">
+              <div class="hidden md:flex flex-col items-end leading-tight">
+                <span id="header-user-name" class="text-xs font-bold text-forest max-w-[115px] truncate">Member</span>
+                <span id="header-user-vibe" class="text-[10px] text-[#6A7870] max-w-[115px] truncate">Smart Buyer</span>
+              </div>
+              <div id="header-user-avatar" class="w-8 h-8 rounded-full bg-forest text-ivory text-xs font-extrabold flex items-center justify-center shadow-sm">
+                NX
+              </div>
+              <button onclick="handleSignOut()" title="Sign Out"
+                class="w-8 h-8 rounded-full bg-white hover:bg-terracotta-light border border-stoneLine hover:border-terracotta/30 flex items-center justify-center text-[#4A5950] hover:text-terracotta transition-all">
+                <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <button onclick="toggleMobileNav()" aria-label="Menu" class="lg:hidden w-8 h-8 rounded-full bg-white border border-stoneLine flex items-center justify-center text-forest">
+              <i data-lucide="menu" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Drawer -->
+        <div id="mobile-nav" class="hidden lg:hidden pb-3 pt-2 border-t border-stoneLine">
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <button data-nav="home" onclick="navigateTo('home'); toggleMobileNav(false)" class="nav-tab px-3 py-2 rounded-xl text-xs font-bold bg-white border border-stoneLine text-[#3D4E44]">AI Concierge</button>
+            <button data-nav="compare" onclick="navigateTo('compare'); toggleMobileNav(false)" class="nav-tab px-3 py-2 rounded-xl text-xs font-bold bg-white border border-stoneLine text-[#3D4E44]">Compare</button>
+            <button data-nav="reviews" onclick="navigateTo('reviews'); toggleMobileNav(false)" class="nav-tab px-3 py-2 rounded-xl text-xs font-bold bg-white border border-stoneLine text-[#3D4E44]">Reviews</button>
+            <button data-nav="price-tracker" onclick="navigateTo('price-tracker'); toggleMobileNav(false)" class="nav-tab px-3 py-2 rounded-xl text-xs font-bold bg-white border border-stoneLine text-[#3D4E44]">Price Tracker</button>
+            <button data-nav="wishlist" onclick="navigateTo('wishlist'); toggleMobileNav(false)" class="nav-tab px-3 py-2 rounded-xl text-xs font-bold bg-white border border-stoneLine text-[#3D4E44] col-span-2 sm:col-span-1">Wishlist</button>
+          </div>
+          <button onclick="toggleLargerText()" class="mt-2 w-full py-2 rounded-xl bg-white border border-stoneLine text-xs font-semibold text-forest sm:hidden">
+            T Toggle Larger Text
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- =================================================================== -->
+    <!-- MAIN CONTENT AREA                                                   -->
+    <!-- =================================================================== -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
+
+      <!-- ================================================================= -->
+      <!-- SECTION 1: HOME (AI CONCIERGE) — CLEAN PROGRESSIVE DISCLOSURE     -->
+      <!-- ================================================================= -->
+      <section id="section-home" class="app-section space-y-8 animate-fade-up">
+
+        <!-- Hero Block (Collapses slightly once chat starts to keep focus) -->
+        <div id="home-hero-block" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <div class="lg:col-span-7 space-y-4">
+            <p class="micro-label">Your Honest, Sharp-Eyed AI Shopping Concierge</p>
+            <h1 class="font-serif text-4xl sm:text-5xl font-bold text-[#142019] leading-[1.08] tracking-tight">
+              Stop scrolling endless tabs.<br />
+              <span class="italic text-forest">Just say what you're excited for.</span>
+            </h1>
+            <p class="text-sm sm:text-base text-[#4A5950] leading-relaxed max-w-xl">
+              Tell NEXIQ your occasion, budget, or craving — from party dresses and sneakers to laptops and gifts. I hunt live <strong>Amazon India &amp; Flipkart offers</strong>, call out hidden catches, and pick the winning store for you.
+            </p>
+          </div>
+
+          <!-- Grand Squirrel-Surrounded NEXIQ Centerpiece -->
+          <div class="lg:col-span-5 flex justify-center lg:justify-end">
+            <div id="hero-logo-mount" class="w-full max-w-[300px]"></div>
+          </div>
+        </div>
+
+        <!-- Inspiring Starter Prompt Pills (Editorial 2x2 Grid like Reference Image 1) -->
+        <div id="starter-prompts-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <button onclick="sendConciergePrompt('I need a stunning evening party dress under ₹4,000 that is currently on discount!')"
+            class="group text-left px-5 py-4 rounded-full bg-white hover:bg-cream border border-stoneLine hover:border-forest/40 shadow-sm flex items-center justify-between gap-3 transition-all">
+            <span class="text-sm font-medium text-[#223128]">Evening party dress under ₹4,000 currently on offer</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-[#6B7970] group-hover:text-forest group-hover:translate-x-1 transition-all shrink-0"></i>
+          </button>
+
+          <button onclick="sendConciergePrompt('Laptop for a CS student who codes and games a little, budget ₹70,000 — check Amazon vs Flipkart deals!')"
+            class="group text-left px-5 py-4 rounded-full bg-white hover:bg-cream border border-stoneLine hover:border-forest/40 shadow-sm flex items-center justify-between gap-3 transition-all">
+            <span class="text-sm font-medium text-[#223128]">Laptop for a CS student who games a little, budget ₹70k</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-[#6B7970] group-hover:text-forest group-hover:translate-x-1 transition-all shrink-0"></i>
+          </button>
+
+          <button onclick="sendConciergePrompt('Running shoes for flat feet under ₹6,000 — I am a beginner and want the best discount')"
+            class="group text-left px-5 py-4 rounded-full bg-white hover:bg-cream border border-stoneLine hover:border-forest/40 shadow-sm flex items-center justify-between gap-3 transition-all">
+            <span class="text-sm font-medium text-[#223128]">Running shoes for flat feet, under ₹6,000 — I'm a beginner</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-[#6B7970] group-hover:text-forest group-hover:translate-x-1 transition-all shrink-0"></i>
+          </button>
+
+          <button onclick="sendConciergePrompt('A thoughtful birthday gift for my dad who loves reading and daily watches under ₹8,000')"
+            class="group text-left px-5 py-4 rounded-full bg-white hover:bg-cream border border-stoneLine hover:border-forest/40 shadow-sm flex items-center justify-between gap-3 transition-all">
+            <span class="text-sm font-medium text-[#223128]">A thoughtful gift for my dad who loves reading &amp; watches</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-[#6B7970] group-hover:text-forest group-hover:translate-x-1 transition-all shrink-0"></i>
+          </button>
+        </div>
+
+        <!-- Live Interactive Concierge Chat Container -->
+        <div class="editorial-card overflow-hidden flex flex-col">
+          <!-- Concierge Bar -->
+          <div class="px-5 py-3.5 bg-cream border-b border-stoneLine flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse"></span>
+              <span class="text-xs font-bold text-forest">NEXIQ Live Concierge</span>
+              <span class="text-[11px] text-[#6A7870] hidden sm:inline">• Grounded in Live 2026 Amazon.in &amp; Flipkart Offers</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="resetConciergeChat()" class="text-xs font-semibold text-[#5A6960] hover:text-terracotta inline-flex items-center gap-1 transition-colors">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> New Chat
+              </button>
+            </div>
+          </div>
+
+          <!-- Chat Feed (Empty until user starts, except a warm welcoming greeting with ZERO pre-dumped products) -->
+          <div id="concierge-feed" class="p-5 sm:p-6 space-y-5 min-h-[260px] max-h-[65vh] overflow-y-auto bg-[#FFFEFC]">
+            <!-- Populated dynamically -->
+          </div>
+
+          <!-- Chat Composer -->
+          <form onsubmit="handleConciergeSubmit(event)" class="p-4 bg-cream border-t border-stoneLine">
+            <div class="flex items-center gap-2 bg-white border border-stoneLine focus-within:border-forest focus-within:ring-2 focus-within:ring-forest/15 rounded-full p-1.5 pl-5 shadow-sm transition-all">
+              <input id="concierge-input" type="text"
+                placeholder="Tell NEXIQ what you're shopping for, your occasion, or just say hi..."
+                class="w-full bg-transparent text-sm text-[#142019] placeholder-[#7C8A82] focus:outline-none" />
+              <button type="submit" id="concierge-send-btn" class="btn-forest px-5 py-2.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 shrink-0">
+                <span>Ask NEXIQ</span>
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Recent Searches (Synced from Firestore, shown only if user has searched) -->
+        <div id="recent-searches-bar" class="hidden items-center flex-wrap gap-2">
+          <span class="text-xs font-bold text-[#6A7870]">Your Recent Hunts:</span>
+          <div id="recent-searches-chips" class="flex flex-wrap gap-2"></div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- SECTION 2: COMPARE (EMPTY BY DEFAULT + LIVE AI COMPARISON CHAT)   -->
+      <!-- ================================================================= -->
+      <section id="section-compare" class="app-section hidden space-y-7 animate-fade-up">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <p class="micro-label mb-1">Side-by-Side Deal Intelligence</p>
+            <h1 class="font-serif text-3xl sm:text-4xl font-bold text-[#142019]">
+              Compare <span class="italic text-forest">only what you choose.</span>
+            </h1>
+            <p class="text-sm text-[#4A5950] mt-1">
+              Your slots stay completely clean until you type a product or add one from your Wishlist or AI Concierge.
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="add-slot3-btn" onclick="enableThirdCompareSlot()" class="px-4 py-2 rounded-full bg-white hover:bg-cream border border-stoneLine text-xs font-bold text-forest transition-all">
+              + Add 3rd Slot
+            </button>
+            <button onclick="clearAllCompareSlots()" class="px-4 py-2 rounded-full bg-white hover:bg-terracotta-light border border-stoneLine text-xs font-semibold text-[#5A6960] hover:text-terracotta transition-all">
+              Clear Slots
+            </button>
+          </div>
+        </div>
+
+        <!-- Empty-by-Default Comparison Slots Grid -->
+        <div id="compare-slots-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Rendered dynamically by JS -->
+        </div>
+
+        <!-- Dynamic Comparison Matrix (Hidden until 2+ products are populated) -->
+        <div id="compare-matrix-container" class="hidden editorial-card overflow-hidden">
+          <div class="px-5 py-4 bg-cream border-b border-stoneLine flex flex-wrap items-center justify-between gap-2">
+            <h2 class="font-serif text-lg font-bold text-forest">Live Offer &amp; Specification Matrix</h2>
+            <span class="text-xs font-semibold text-terracotta">Updated with 2026 Amazon.in &amp; Flipkart Deals</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[640px]">
+              <tbody id="compare-matrix-tbody" class="divide-y divide-stoneLine text-sm"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Interactive Comparison AI Assistant (Activates once 2+ items are in slots) -->
+        <div id="compare-ai-panel" class="hidden editorial-card overflow-hidden border-forest/25">
+          <div class="px-5 py-4 bg-forest text-ivory flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-ivory/15 border border-ivory/25 flex items-center justify-center text-gold-light">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="font-serif text-base font-bold leading-tight">NEXIQ Interactive Comparison Coach</h3>
+                <p class="text-[11px] text-ivory/80">Tell me what matters most to you and I'll crown your personalized winner!</p>
+              </div>
+            </div>
+            <button onclick="declareCompareWinner()" class="px-3.5 py-1.5 rounded-full bg-gold text-white text-xs font-bold hover:brightness-110 transition-all">
+              🏆 Declare Tailored Winner
+            </button>
+          </div>
+
+          <div id="compare-chat-feed" class="p-5 space-y-4 max-h-80 overflow-y-auto bg-[#FFFEFC]"></div>
+
+          <!-- Quick follow-up chips -->
+          <div id="compare-quick-chips" class="px-5 py-2.5 bg-cream/70 border-t border-stoneLine flex flex-wrap gap-2"></div>
+
+          <form onsubmit="handleCompareChatSubmit(event)" class="p-4 bg-cream border-t border-stoneLine">
+            <div class="flex items-center gap-2 bg-white border border-stoneLine focus-within:border-forest rounded-full p-1.5 pl-4">
+              <input id="compare-chat-input" type="text"
+                placeholder="Ask e.g. 'Which one has better resale value?' or 'Is Flipkart safer than Amazon here?'"
+                class="w-full bg-transparent text-sm text-[#142019] placeholder-[#7C8A82] focus:outline-none" />
+              <button type="submit" id="compare-chat-send-btn" class="btn-forest px-4 py-2 rounded-full text-xs font-bold shrink-0">
+                Ask Coach
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- SECTION 3: REVIEWS (CRYSTAL-CLEAR PROS & CONS)                    -->
+      <!-- ================================================================= -->
+      <section id="section-reviews" class="app-section hidden space-y-7 animate-fade-up">
+        <div class="text-center max-w-2xl mx-auto space-y-3">
+          <p class="micro-label">Honest Buyer Truth • Zero Fluff</p>
+          <h1 class="font-serif text-3xl sm:text-4xl font-bold text-[#142019]">
+            Uncover real <span class="italic text-forest">Pros &amp; Hidden Catches.</span>
+          </h1>
+          <p class="text-sm text-[#4A5950]">
+            Enter any product — tech, fashion, footwear, or home — to synthesize fresh 2026 buyer feedback across Amazon India &amp; Flipkart.
+          </p>
+
+          <form onsubmit="handleReviewsSearch(event)" class="pt-2">
+            <div class="flex items-center bg-white border border-stoneLine focus-within:border-forest focus-within:ring-2 focus-within:ring-forest/15 rounded-full p-1.5 pl-5 shadow-editorial">
+              <i data-lucide="search" class="w-4 h-4 text-[#7C8A82] mr-2.5 shrink-0"></i>
+              <input id="reviews-search-input" type="text" required
+                placeholder="Enter any product name (e.g. Sony WH-1000XM5, Zara Satin Dress, Nike Pegasus)..."
+                class="w-full bg-transparent text-sm text-[#142019] placeholder-[#7C8A82] focus:outline-none" />
+              <button type="submit" id="reviews-search-btn" class="btn-forest px-5 py-2.5 rounded-full text-xs font-bold shrink-0">
+                Analyze Reviews
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Empty State (Shown before user searches) -->
+        <div id="reviews-empty-state" class="editorial-card-soft p-10 text-center max-w-2xl mx-auto space-y-2">
+          <div class="w-12 h-12 rounded-full bg-forest/10 text-forest flex items-center justify-center mx-auto">
+            <i data-lucide="message-square-heart" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-serif text-lg font-bold text-[#142019]">No product analyzed yet</h3>
+          <p class="text-xs text-[#5A6960]">Search a product above — or click "Read Pros &amp; Cons" on any product card from the AI Concierge or Wishlist.</p>
+        </div>
+
+        <!-- Loading Skeleton -->
+        <div id="reviews-loading" class="hidden space-y-5">
+          <div class="editorial-card p-6 space-y-4">
+            <div class="h-6 w-1/3 rounded-lg skeleton"></div>
+            <div class="h-4 w-2/3 rounded-lg skeleton"></div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="editorial-card p-6 h-56 skeleton"></div>
+            <div class="editorial-card p-6 h-56 skeleton"></div>
+          </div>
+        </div>
+
+        <!-- Dynamic Review Result Container -->
+        <div id="reviews-result" class="hidden space-y-6"></div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- SECTION 4: PRICE TRACKER (RENAMED FROM PRICE INTEL)               -->
+      <!-- ================================================================= -->
+      <section id="section-price-tracker" class="app-section hidden space-y-7 animate-fade-up">
+        <div class="text-center max-w-2xl mx-auto space-y-3">
+          <p class="micro-label">Live Amazon.in vs Flipkart Price Tracker</p>
+          <h1 class="font-serif text-3xl sm:text-4xl font-bold text-[#142019]">
+            Never overpay. <span class="italic text-forest">Track every drop.</span>
+          </h1>
+          <p class="text-sm text-[#4A5950]">
+            Enter any product to check live 2026 offers, compare Amazon India vs Flipkart discounts, inspect 6-month trends, and save price drop alerts to your account.
+          </p>
+
+          <form onsubmit="handlePriceTrackerSearch(event)" class="pt-2">
+            <div class="flex items-center bg-white border border-stoneLine focus-within:border-forest focus-within:ring-2 focus-within:ring-forest/15 rounded-full p-1.5 pl-5 shadow-editorial">
+              <i data-lucide="trending-down" class="w-4 h-4 text-terracotta mr-2.5 shrink-0"></i>
+              <input id="tracker-search-input" type="text" required
+                placeholder="Enter a product to track live Amazon & Flipkart prices (e.g. iPhone 16, MacBook Air M3)..."
+                class="w-full bg-transparent text-sm text-[#142019] placeholder-[#7C8A82] focus:outline-none" />
+              <button type="submit" id="tracker-search-btn" class="btn-forest px-5 py-2.5 rounded-full text-xs font-bold shrink-0">
+                Track Price
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Empty State -->
+        <div id="tracker-empty-state" class="editorial-card-soft p-10 text-center max-w-2xl mx-auto space-y-2">
+          <div class="w-12 h-12 rounded-full bg-terracotta-light text-terracotta flex items-center justify-center mx-auto">
+            <i data-lucide="bell-ring" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-serif text-lg font-bold text-[#142019]">Ready to track live Indian deals</h3>
+          <p class="text-xs text-[#5A6960]">Enter any product name above to pull real-time Amazon.in vs Flipkart offers, discount percentages, and 6-month price trends.</p>
+        </div>
+
+        <!-- Loading Skeleton -->
+        <div id="tracker-loading" class="hidden space-y-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="editorial-card p-6 h-40 skeleton"></div>
+            <div class="editorial-card p-6 h-40 skeleton"></div>
+          </div>
+          <div class="editorial-card p-6 h-72 skeleton"></div>
+        </div>
+
+        <!-- Dynamic Price Tracker Results -->
+        <div id="tracker-result" class="hidden space-y-6"></div>
+
+        <!-- User's Active Firestore Price Alerts -->
+        <div id="tracker-alerts-section" class="editorial-card p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="micro-label">Synced to Your Account</p>
+              <h3 class="font-serif text-xl font-bold text-[#142019]">Your Active Price Drop Alerts</h3>
+            </div>
+            <span id="alerts-count-badge" class="px-3 py-1 rounded-full bg-sage text-forest text-xs font-bold">0 active</span>
+          </div>
+          <div id="tracker-alerts-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- SECTION 5: WISHLIST (FIRESTORE PERSISTED)                         -->
+      <!-- ================================================================= -->
+      <section id="section-wishlist" class="app-section hidden space-y-7 animate-fade-up">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <p class="micro-label mb-1">Your Saved Collection</p>
+            <h1 class="font-serif text-3xl sm:text-4xl font-bold text-[#142019]">
+              My <span class="italic text-forest">Wishlist.</span>
+            </h1>
+            <p class="text-sm text-[#4A5950] mt-1">All products you've saved with live offer prices and Amazon vs Flipkart picks, synced to your NEXIQ account.</p>
+          </div>
+          <button onclick="sendWishlistToCompare()" class="btn-forest px-5 py-2.5 rounded-full text-xs font-bold inline-flex items-center gap-2 self-start sm:self-auto">
+            <i data-lucide="scale" class="w-4 h-4"></i> Compare Top Saved Items
+          </button>
+        </div>
+
+        <div id="wishlist-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+      </section>
+
+    </main>
+
+    <!-- Editorial Footer -->
+    <footer class="border-t border-stoneLine bg-cream/70 mt-10">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-wrap items-center justify-between gap-3 text-xs text-[#5A6960]">
+        <div class="flex items-center gap-2">
+          <span class="font-serif font-bold text-forest text-sm">NEXIQ</span>
+          <span>• Next Generation Intelligence Shopping</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-4">
+          <span>Live 2026 Market Analysis</span>
+          <span>Amazon.in &amp; Flipkart Intelligence</span>
+          <span class="text-forest font-semibold">Cloud-Synced Account</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 pointer-events-none max-w-sm w-full px-4 sm:px-0"></div>
+
+  <!-- ===================================================================== -->
+  <!-- APPLICATION MODULE: FIREBASE AUTH + FIRESTORE + GEMINI API            -->
+  <!-- ===================================================================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      updateProfile,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signInWithCustomToken,
+      signInAnonymously,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      doc,
+      setDoc,
+      getDoc,
+      addDoc,
+      deleteDoc,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    /* =====================================================================
+     * 1. BESPOKE SQUIRREL MASCOT + NEXIQ LOGO SVGs (WARM EDITORIAL PALETTE)
+     * ===================================================================== */
+    function getGrandSquirrelLockupSVG() {
+      return `
+      <svg viewBox="0 0 380 250" class="w-full h-auto drop-shadow-[0_14px_24px_rgba(17,62,42,0.12)]" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NEXIQ Squirrel Mascot Logo">
+        <defs>
+          <linearGradient id="furMain" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#E08A4B"/>
+            <stop offset="55%" stop-color="#C96B32"/>
+            <stop offset="100%" stop-color="#9A481E"/>
+          </linearGradient>
+          <linearGradient id="furTail" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#E89A5C"/>
+            <stop offset="50%" stop-color="#B85D2B"/>
+            <stop offset="100%" stop-color="#7D3615"/>
+          </linearGradient>
+          <linearGradient id="goldRim" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#E6B45A"/>
+            <stop offset="50%" stop-color="#C68B2C"/>
+            <stop offset="100%" stop-color="#9B6718"/>
+          </linearGradient>
+          <linearGradient id="lensGlass" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+            <stop offset="50%" stop-color="#EAF0E8" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#C68B2C" stop-opacity="0.25"/>
+          </linearGradient>
+          <linearGradient id="shadesLens" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1E5D40"/>
+            <stop offset="100%" stop-color="#0B291C"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Decorative Orbital & Botanical Arcs Framing Mascot & NEXIQ -->
+        <path d="M 46 156 A 146 126 0 0 1 334 156" fill="none" stroke="url(#goldRim)" stroke-width="2" stroke-dasharray="5 5" opacity="0.65"/>
+        <path d="M 28 168 A 164 138 0 0 1 352 168" fill="none" stroke="#113E2A" stroke-width="1.3" opacity="0.25"/>
+
+        <!-- Botanical Forest Leaves on Left & Right Framing NEXIQ -->
+        <g fill="#113E2A" opacity="0.85">
+          <path d="M 52 162 C 36 150, 32 134, 48 128 C 58 138, 58 152, 52 162 Z"/>
+          <path d="M 42 146 C 24 140, 18 126, 30 116 C 42 124, 44 136, 42 146 Z" opacity="0.65"/>
+          <path d="M 328 162 C 344 150, 348 134, 332 128 C 322 138, 322 152, 328 162 Z"/>
+          <path d="M 338 146 C 356 140, 362 126, 350 116 C 338 124, 336 136, 338 146 Z" opacity="0.65"/>
+        </g>
+
+        <!-- Gold Sparkle Stars -->
+        <g fill="#C68B2C">
+          <path d="M 96 42 L 99 50 L 107 53 L 99 56 L 96 64 L 93 56 L 85 53 L 93 50 Z"/>
+          <path d="M 294 56 L 296 62 L 302 64 L 296 66 L 294 72 L 292 66 L 286 64 L 292 62 Z"/>
+          <circle cx="72" cy="96" r="3" fill="#D95D39"/>
+          <circle cx="310" cy="108" r="2.8" fill="#D95D39"/>
+        </g>
+
+        <!-- Squirrel Mascot Group -->
+        <g class="animate-squirrel">
+          <!-- Lush Curving Bushy Tail -->
+          <path d="M 150 144 C 82 148, 62 84, 96 52 C 122 28, 166 48, 152 86 C 144 106, 156 124, 168 132 Z" fill="url(#furTail)" stroke="#7D3615" stroke-width="1.5"/>
+          <path d="M 98 62 C 118 46, 146 60, 138 86 C 132 104, 142 122, 152 134" fill="none" stroke="#F6C89F" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
+
+          <!-- Forest Green Cozy Hoodie Body -->
+          <path d="M 138 162 C 138 124, 164 114, 192 114 C 220 114, 240 128, 240 162 Z" fill="#113E2A" stroke="#0A291B" stroke-width="1.5"/>
+          <!-- Hoodie Collar & Drawstrings -->
+          <path d="M 164 118 Q 190 134 218 118" fill="none" stroke="#1F6344" stroke-width="6" stroke-linecap="round"/>
+          <line x1="178" y1="126" x2="176" y2="148" stroke="#FAF6EE" stroke-width="2" stroke-linecap="round"/>
+          <line x1="202" y1="126" x2="204" y2="148" stroke="#FAF6EE" stroke-width="2" stroke-linecap="round"/>
+          <!-- Terracotta Sleeve Stripe -->
+          <path d="M 145 138 L 160 156" stroke="#D95D39" stroke-width="3" stroke-linecap="round"/>
+
+          <!-- Squirrel Ears -->
+          <path d="M 156 58 L 146 24 L 178 44 Z" fill="url(#furMain)" stroke="#7D3615" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M 157 52 L 152 33 L 171 45 Z" fill="#FDEBD6"/>
+          <path d="M 218 52 L 234 22 L 236 58 Z" fill="url(#furMain)" stroke="#7D3615" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M 222 50 L 231 32 L 232 54 Z" fill="#FDEBD6"/>
+
+          <!-- Squirrel Head -->
+          <ellipse cx="194" cy="82" rx="44" ry="38" fill="url(#furMain)" stroke="#7D3615" stroke-width="1.5"/>
+          <!-- Soft Cream Lower Cheeks & Muzzle -->
+          <path d="M 160 88 C 162 114, 224 116, 232 88 C 222 96, 206 90, 196 90 C 184 90, 170 96, 160 88 Z" fill="#FDEBD6"/>
+          <!-- Hair Tuft -->
+          <path d="M 184 46 Q 192 32 204 44 Q 210 36 214 48" fill="#C96B32" stroke="#7D3615" stroke-width="1.2"/>
+
+          <!-- Expressive Eyes -->
+          <ellipse cx="182" cy="82" rx="8.5" ry="10.5" fill="#1C1410"/>
+          <circle cx="179.5" cy="78.5" r="3" fill="#FFFFFF"/>
+          <circle cx="184.5" cy="85" r="1.4" fill="#FFFFFF"/>
+
+          <ellipse cx="212" cy="81" rx="8" ry="10" fill="#1C1410"/>
+          <circle cx="209.5" cy="77.5" r="2.8" fill="#FFFFFF"/>
+          <circle cx="214.5" cy="84" r="1.3" fill="#FFFFFF"/>
+
+          <!-- Cute Nose & Confident Smile -->
+          <ellipse cx="199" cy="94" rx="4.5" ry="3" fill="#3D1C0E"/>
+          <path d="M 192 100 Q 199 106 206 100" fill="none" stroke="#3D1C0E" stroke-width="2" stroke-linecap="round"/>
+
+          <!-- Stylish Sunglasses Perched on Forehead -->
+          <g transform="rotate(-5 196 58)">
+            <rect x="158" y="45" width="32" height="19" rx="7" fill="url(#shadesLens)" stroke="url(#goldRim)" stroke-width="2.5"/>
+            <rect x="200" y="45" width="32" height="19" rx="7" fill="url(#shadesLens)" stroke="url(#goldRim)" stroke-width="2.5"/>
+            <path d="M 190 52 Q 195 48 200 52" fill="none" stroke="url(#goldRim)" stroke-width="2.5"/>
+            <line x1="164" y1="50" x2="174" y2="59" stroke="#FFFFFF" stroke-opacity="0.45" stroke-width="2" stroke-linecap="round"/>
+            <line x1="206" y1="50" x2="216" y2="59" stroke="#FFFFFF" stroke-opacity="0.45" stroke-width="2" stroke-linecap="round"/>
+          </g>
+
+          <!-- "AI" Over-Ear Headphones around Neck -->
+          <path d="M 158 112 Q 192 132 224 112" fill="none" stroke="#0A291B" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="164" cy="116" r="13" fill="#113E2A" stroke="url(#goldRim)" stroke-width="2.4"/>
+          <text x="164" y="120" text-anchor="middle" fill="#FAF6EE" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="9.5">AI</text>
+          <circle cx="220" cy="116" r="11" fill="#113E2A" stroke="url(#goldRim)" stroke-width="2"/>
+
+          <!-- Squirrel Paw Holding Gleaming Gold Magnifying Glass -->
+          <g transform="translate(220, 88) rotate(-14)">
+            <rect x="14" y="40" width="9" height="32" rx="4.5" fill="#113E2A" stroke="url(#goldRim)" stroke-width="1.6"/>
+            <circle cx="18.5" cy="20" r="21" fill="url(#lensGlass)" stroke="url(#goldRim)" stroke-width="4.2"/>
+            <path d="M 8 12 A 13 13 0 0 1 20 6" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>
+          </g>
+          <!-- Paw gripping handle -->
+          <ellipse cx="232" cy="142" rx="10" ry="7.5" fill="url(#furMain)" stroke="#7D3615" stroke-width="1.2"/>
+        </g>
+
+        <!-- Editorial Ribbon Divider Under Mascot -->
+        <path d="M 54 166 Q 190 156 326 166" fill="none" stroke="url(#goldRim)" stroke-width="2" stroke-linecap="round"/>
+
+        <!-- Bold Editorial NEXIQ Wordmark Framed Cleanly -->
+        <text x="190" y="210" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-weight="800" font-size="48" letter-spacing="4" fill="#113E2A">
+          NEXIQ
+        </text>
+
+        <!-- Tagline Tucked Cleanly Underneath -->
+        <text x="190" y="232" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-weight="700" font-size="9.8" letter-spacing="2.3" fill="#D95D39">
+          NEXT GENERATION INTELLIGENCE SHOPPING
+        </text>
+      </svg>`;
+    }
+
+    function getCompactSquirrelCrestSVG() {
+      return `
+      <svg viewBox="0 0 64 64" class="w-full h-full" xmlns="http://www.w3.org/2000/svg" aria-label="NEXIQ Crest">
+        <circle cx="32" cy="32" r="30" fill="#113E2A" stroke="#C68B2C" stroke-width="2"/>
+        <!-- Tail hint -->
+        <path d="M 22 46 C 10 44, 10 24, 20 19 C 24 26, 22 36, 26 42 Z" fill="#B85D2B"/>
+        <!-- Ears -->
+        <path d="M 22 21 L 20 11 L 29 17 Z" fill="#E08A4B"/>
+        <path d="M 38 17 L 46 11 L 45 22 Z" fill="#E08A4B"/>
+        <!-- Head -->
+        <ellipse cx="34" cy="31" rx="13" ry="12" fill="#E08A4B"/>
+        <path d="M 23 34 C 25 42, 43 42, 45 34 C 40 37, 28 37, 23 34 Z" fill="#FDEBD6"/>
+        <!-- Shades -->
+        <rect x="23" y="20" width="9" height="5.5" rx="2" fill="#0A291B" stroke="#C68B2C" stroke-width="1.2"/>
+        <rect x="35" y="20" width="9" height="5.5" rx="2" fill="#0A291B" stroke="#C68B2C" stroke-width="1.2"/>
+        <line x1="32" y1="22.5" x2="35" y2="22.5" stroke="#C68B2C" stroke-width="1.2"/>
+        <!-- Eyes & Smile -->
+        <circle cx="29.5" cy="31" r="2.4" fill="#1C1410"/>
+        <circle cx="28.8" cy="30.2" r="0.8" fill="#FFF"/>
+        <circle cx="38.5" cy="31" r="2.4" fill="#1C1410"/>
+        <circle cx="37.8" cy="30.2" r="0.8" fill="#FFF"/>
+        <ellipse cx="34" cy="35" rx="1.8" ry="1.2" fill="#3D1C0E"/>
+        <!-- Magnifying Glass -->
+        <circle cx="48" cy="41" r="6.5" fill="#FAF6EE" fill-opacity="0.85" stroke="#C68B2C" stroke-width="2"/>
+        <line x1="43" y1="46" x2="39" y2="51" stroke="#C68B2C" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>`;
+    }
+
+    /* =====================================================================
+     * 2. FIREBASE INITIALIZATION & REAL AUTH + FIRESTORE SETUP
+     * ===================================================================== */
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'nexiq-shopping-app';
+    let app = null;
+    let auth = null;
+    let db = null;
+    let firebaseReady = false;
+
+    try {
+      const firebaseConfig = typeof __firebase_config !== 'undefined'
+        ? JSON.parse(__firebase_config)
+        : null;
+      if (firebaseConfig && firebaseConfig.apiKey) {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        firebaseReady = true;
+      }
+    } catch (err) {
+      console.warn('Firebase init note:', err.message);
+    }
+
+    /* =====================================================================
+     * 3. APPLICATION STATE
+     * ===================================================================== */
+    const state = {
+      authMode: 'signin',
+      selectedVibe: 'Tech Hunter',
+      currentUser: null,
+      userProfile: { name: '', email: '', vibe: 'Tech Hunter' },
+      activeSection: 'home',
+      largerText: false,
+      wishlist: [],          // Synced from Firestore
+      priceAlerts: [],       // Synced from Firestore
+      recentSearches: [],    // Synced from Firestore
+      conciergeMessages: [], // Gemini conversation history
+      compareSlots: [null, null], // Empty by default! Optional 3rd slot added on demand
+      compareLoading: [false, false],
+      compareChatMessages: [],
+      currentReviewData: null,
+      currentTrackerData: null,
+      priceChart: null,
+      unsubscribers: [],
+    };
+
+    /* =====================================================================
+     * 4. GEMINI API HELPER (LIVE 2026 GOOGLE SEARCH GROUNDED + BACKOFF)
+     * ===================================================================== */
+    const GEMINI_API_KEY = ""; // Runtime-provided by environment
+    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`;
+
+    async function callGemini({ systemInstruction, contents, useSearch = true }) {
+      const payload = {
+        contents,
+        systemInstruction: { parts: [{ text: systemInstruction }] },
+      };
+      if (useSearch) {
+        payload.tools = [{ google_search: {} }];
+      }
+
+      const delays = [1000, 2000, 4000];
+      let lastError = null;
+
+      for (let attempt = 0; attempt <= delays.length; attempt++) {
+        try {
+          const res = await fetch(GEMINI_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          if (!res.ok) {
+            if ((res.status === 429 || res.status >= 500) && attempt < delays.length) {
+              await new Promise((r) => setTimeout(r, delays[attempt]));
+              continue;
+            }
+            throw new Error(`Gemini HTTP ${res.status}`);
+          }
+
+          const data = await res.json();
+          const candidate = data?.candidates?.[0];
+          const text = candidate?.content?.parts?.map((p) => p.text || '').join('') || '';
+          const attributions = candidate?.groundingMetadata?.groundingAttributions || [];
+          const sources = attributions
+            .map((a) => ({ uri: a.web?.uri, title: a.web?.title }))
+            .filter((s) => s.uri && s.title)
+            .slice(0, 4);
+
+          return { text, sources };
+        } catch (err) {
+          lastError = err;
+          if (attempt < delays.length) {
+            await new Promise((r) => setTimeout(r, delays[attempt]));
+          }
+        }
+      }
+      throw lastError || new Error('Failed to reach NEXIQ AI');
+    }
+
+    function extractJSON(rawText) {
+      if (!rawText) return null;
+      // Strip markdown code fences if present
+      let cleaned = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+      const firstBrace = cleaned.indexOf('{');
+      const lastBrace = cleaned.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+      }
+      try {
+        return JSON.parse(cleaned);
+      } catch {
+        return null;
+      }
+    }
+
+    const formatINR = (val) => {
+      const num = Number(String(val).replace(/[^\d.]/g, ''));
+      if (isNaN(num) || num <= 0) return String(val || '—');
+      return '₹' + Math.round(num).toLocaleString('en-IN');
+    };
+
+    const escapeHTML = (str) =>
+      String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+    /* =====================================================================
+     * 5. TOAST NOTIFICATIONS (NO alert() OR confirm())
+     * ===================================================================== */
+    function showToast(message, tone = 'forest') {
+      const container = document.getElementById('toast-container');
+      const el = document.createElement('div');
+      const styles = {
+        forest: 'bg-forest text-ivory border-forest-dark',
+        terracotta: 'bg-terracotta text-white border-terracotta-dark',
+        gold: 'bg-[#FEF7E8] text-[#6B470F] border-gold/40',
+      };
+      el.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-2xl border shadow-editorialHover text-xs font-semibold animate-fade-up ${styles[tone] || styles.forest}`;
+      el.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4 shrink-0"></i><span>${escapeHTML(message)}</span>`;
+      container.appendChild(el);
+      lucide.createIcons();
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(8px)';
+        el.style.transition = 'all 0.25s ease';
+        setTimeout(() => el.remove(), 260);
+      }, 3000);
+    }
+
+    /* =====================================================================
+     * 6. MANDATORY LOGIN GATE & FIREBASE AUTH FLOW
+     * ===================================================================== */
+    function showAuthError(msg) {
+      const box = document.getElementById('auth-error-box');
+      document.getElementById('auth-error-text').textContent = msg;
+      box.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function clearAuthError() {
+      document.getElementById('auth-error-box').classList.add('hidden');
+    }
+
+    function setAuthMode(mode) {
+      state.authMode = mode;
+      clearAuthError();
+      const isSignUp = mode === 'signup';
+      document.getElementById('field-fullname').classList.toggle('hidden', !isSignUp);
+      document.getElementById('auth-heading').textContent = isSignUp ? 'Create your NEXIQ account' : 'Sign in to NEXIQ';
+      document.getElementById('auth-submit-label').textContent = isSignUp ? 'Create Account & Enter' : 'Enter NEXIQ Workspace';
+      document.getElementById('tab-signin').className = !isSignUp
+        ? 'py-2 rounded-full text-xs font-bold bg-forest text-ivory transition-all'
+        : 'py-2 rounded-full text-xs font-semibold text-[#4A5950] hover:text-forest transition-all';
+      document.getElementById('tab-signup').className = isSignUp
+        ? 'py-2 rounded-full text-xs font-bold bg-forest text-ivory transition-all'
+        : 'py-2 rounded-full text-xs font-semibold text-[#4A5950] hover:text-forest transition-all';
+    }
+
+    function selectShoppingVibe(vibe) {
+      state.selectedVibe = vibe;
+      document.querySelectorAll('.vibe-btn').forEach((btn) => {
+        const active = btn.dataset.vibe === vibe;
+        btn.className = active
+          ? 'vibe-btn px-2.5 py-2 rounded-xl text-[11px] font-semibold border border-forest bg-forest/10 text-forest transition-all'
+          : 'vibe-btn px-2.5 py-2 rounded-xl text-[11px] font-semibold border border-stoneLine bg-cream text-[#4A5950] hover:border-forest/40 transition-all';
+      });
+    }
+
+    async function completeFirebaseLogin(user, profileData) {
+      state.currentUser = user;
+      const uid = user.uid;
+
+      // Save/update member profile in Firestore under strict path
+      if (db && uid) {
+        try {
+          const profileRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'main');
+          const snap = await getDoc(profileRef);
+          const existing = snap.exists() ? snap.data() : {};
+          const merged = {
+            name: profileData.name || existing.name || user.displayName || (profileData.email ? profileData.email.split('@')[0] : 'NEXIQ Member'),
+            email: profileData.email || existing.email || user.email || '',
+            vibe: profileData.vibe || existing.vibe || state.selectedVibe || 'Everyday Smart Buyer',
+            updatedAt: Date.now(),
+          };
+          await setDoc(profileRef, merged, { merge: true });
+          state.userProfile = merged;
+        } catch (err) {
+          console.warn('Profile sync note:', err.message);
+          state.userProfile = {
+            name: profileData.name || user.displayName || 'NEXIQ Member',
+            email: profileData.email || user.email || '',
+            vibe: profileData.vibe || state.selectedVibe,
+          };
+        }
+      } else {
+        state.userProfile = {
+          name: profileData.name || 'NEXIQ Member',
+          email: profileData.email || '',
+          vibe: profileData.vibe || state.selectedVibe,
+        };
+      }
+
+      enterWorkspace();
+    }
+
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      clearAuthError();
+
+      const email = document.getElementById('input-email').value.trim();
+      const password = document.getElementById('input-password').value;
+      const fullName = document.getElementById('input-fullname').value.trim();
+
+      // Strict client validation
+      if (state.authMode === 'signup' && fullName.length < 2) {
+        showAuthError('Please enter your full name to create your NEXIQ account.');
+        return;
+      }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showAuthError('Please enter a valid email address.');
+        return;
+      }
+      if (!password || password.length < 6) {
+        showAuthError('Password must be at least 6 characters long.');
+        return;
+      }
+
+      const btn = document.getElementById('auth-submit-btn');
+      const lbl = document.getElementById('auth-submit-label');
+      btn.disabled = true;
+      lbl.textContent = state.authMode === 'signup' ? 'Creating Account...' : 'Signing In...';
+
+      try {
+        if (firebaseReady && auth) {
+          let cred;
+          try {
+            if (state.authMode === 'signup') {
+              cred = await createUserWithEmailAndPassword(auth, email, password);
+              await updateProfile(cred.user, { displayName: fullName });
+            } else {
+              cred = await signInWithEmailAndPassword(auth, email, password);
+            }
+          } catch (authErr) {
+            // If Email/Password provider isn't enabled in sandbox Firebase, authenticate via token/anonymous to preserve real Firestore UID persistence
+            const sandboxCodes = ['auth/operation-not-allowed', 'auth/configuration-not-found', 'auth/admin-restricted-operation'];
+            if (sandboxCodes.includes(authErr.code)) {
+              if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                cred = await signInWithCustomToken(auth, __initial_auth_token);
+              } else {
+                cred = await signInAnonymously(auth);
+              }
+            } else if (authErr.code === 'auth/email-already-in-use') {
+              throw new Error('This email is already registered. Switch to "Sign In" instead.');
+            } else if (authErr.code === 'auth/wrong-password' || authErr.code === 'auth/invalid-credential' || authErr.code === 'auth/user-not-found') {
+              throw new Error('Invalid email or password. Try again or switch to "Create Account".');
+            } else {
+              throw authErr;
+            }
+          }
+          await completeFirebaseLogin(cred.user, {
+            name: fullName || cred.user.displayName || email.split('@')[0],
+            email,
+            vibe: state.selectedVibe,
+          });
+        } else {
+          // Fallback if no Firebase config exists in local file preview
+          await completeFirebaseLogin(
+            { uid: 'local-' + btoa(email).slice(0, 12), email, displayName: fullName || email.split('@')[0] },
+            { name: fullName || email.split('@')[0], email, vibe: state.selectedVibe }
+          );
+        }
+      } catch (err) {
+        showAuthError(err.message || 'Authentication failed. Please check your credentials.');
+      } finally {
+        btn.disabled = false;
+        lbl.textContent = state.authMode === 'signup' ? 'Create Account & Enter' : 'Enter NEXIQ Workspace';
+      }
+    }
+
+    async function handleGoogleSignIn() {
+      clearAuthError();
+      const btn = document.getElementById('google-signin-btn');
+      btn.disabled = true;
+
+      try {
+        if (firebaseReady && auth) {
+          let cred;
+          try {
+            const provider = new GoogleAuthProvider();
+            cred = await signInWithPopup(auth, provider);
+          } catch (gErr) {
